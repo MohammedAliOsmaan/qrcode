@@ -1,4 +1,4 @@
-import { Modes, ErrorCorrectionLevel } from './constants.ts';
+import { Modes, ErrorCorrectionLevel, quality } from './constants.ts';
 
 /**
  * QR Code capacity table for different versions and error correction levels.
@@ -6,8 +6,8 @@ import { Modes, ErrorCorrectionLevel } from './constants.ts';
  * in a QR Code of a specific version and error correction level.
  */
 
-const capacities: {
-  [version: number]: { [ec in ErrorCorrectionLevel]: { [mode in Modes]: number } };
+export const capacities: {
+  readonly [version: number]: { [ec in ErrorCorrectionLevel]: { [mode in Modes]: number } };
 } = {
   1: {
     L: { [Modes.Numeric]: 41, [Modes.Alphanumeric]: 25, [Modes.Byte]: 17, [Modes.Kanji]: 10 },
@@ -252,35 +252,52 @@ const capacities: {
 };
 
 export interface Capacity {
-  version: number,
-  ec: ErrorCorrectionLevel,
-  mode: Modes,
-  capacity: number
+  readonly version: number,
+  readonly ec: ErrorCorrectionLevel,
+  readonly mode: Modes,
+  readonly capacity: number
 }
 
 export function capacity(length: number, mode: Modes, version?: number, ec?: ErrorCorrectionLevel): Capacity {
+  if (length < 0) throw new RangeError("Length cannot be negative.");
+
   if (version && ec) {
-    if (capacities[version][ec][mode] < length) {
-      throw new Error(`Data too long for version ${version} and error correction level ${ec}. Maximum character is ${capacities[version][ec][mode]}.`);
-    } else {
-      return { version, ec, mode, capacity: capacities[version][ec][mode] };
+    const limit = capacities[version]?.[ec]?.[mode];
+
+    if (limit === undefined || length > limit) {
+      throw new Error(
+        `Data too long for version ${version} and error correction level ${ec}. Maximum character is ${limit}.`
+      );
     }
-  } else if (version) {
-    for (const ecLevel of Object.keys(capacities[version]) as ErrorCorrectionLevel[]) {
-      if (capacities[version][ecLevel][mode] > length) {
-        return { version, ec: ecLevel, mode, capacity: capacities[version][ecLevel][mode] };
+    return { version, ec, mode, capacity: limit };
+  }
+
+  if (version) {
+    for (const ecLevel of quality) { // L, M, Q, H
+      const limit = capacities[version]?.[ecLevel]?.[mode];
+
+      if (limit !== undefined && limit >= length) {
+        return { version, ec: ecLevel, mode, capacity: limit };
       }
     }
-  } else {
-    for (const ver of (Object.keys(capacities)) as string[]) {
-      const version = parseInt(ver, 10);
-      for (const ecLevel of Object.keys(capacities[version]) as ErrorCorrectionLevel[]) {
-        if (capacities[version][ecLevel][mode] > length) {
-          return { version, ec: ecLevel, mode, capacity: capacities[version][ecLevel][mode] };
-        }
+    throw new Error(`Data too long for version ${version}.`);
+  }
+
+  for (let v = 1; v <= 40; v++) {
+    for (const ecLevel of quality) { // L, M, Q, H
+      const limit = capacities[v]?.[ecLevel]?.[mode];
+      
+      if (limit !== undefined && limit >= length) {
+        return { version: v, ec: ecLevel, mode, capacity: limit };
       }
     }
   }
 
-  throw new Error(`Data too long for any version and error correction level. Maximum character is ${Math.max(...Object.values(capacities).flatMap(v => Object.values(v).flatMap(ec => Object.values(ec))))}.`);
+  throw new Error(
+    `Data too long for any QR version. Maximum character is ${Math.max(
+      ...Object.values(capacities)
+        .flatMap(v => Object.values(v))
+        .flatMap(ec => Object.values(ec))
+    )}.`
+  );
 }
