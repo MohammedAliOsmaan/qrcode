@@ -5,7 +5,7 @@ import { format, apply as formatter } from "./format.ts"
 import { ErrorCorrectionLevel } from "../core/constants.ts";
 import { apply as versioning } from "./version.ts";
 
-export function matrix(message: Uint8Array, ec: ErrorCorrectionLevel, size: number): Matrix {
+export function matrix(message: Uint8Array, ec: ErrorCorrectionLevel, size: number, maskID?: number): Matrix {
 
     const matrix: Matrix = Array.from({ length: size }, () => Array(size).fill(null));
     const bits = Array.from(message).flatMap(byte => byte.toString(2).padStart(8, '0')
@@ -19,7 +19,7 @@ export function matrix(message: Uint8Array, ec: ErrorCorrectionLevel, size: numb
 
     placement(matrix, bits, size);
 
-    const maskId = mask(matrix, size, ec);
+    const maskId = maskID ?? mask(matrix, size, ec);
 
     // apply mask
     masker(matrix, maskId, size);
