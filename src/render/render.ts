@@ -152,7 +152,7 @@ export function svg(matrix: Matrix, size: number, options?: RenderOptions): SVGE
 				defs.appendChild(clipPath);
 				svgEl.appendChild(defs);
 				// store clipId for use when adding the image element later
-				(logo as never as any).__clipId = clipId;
+				(logo as NonNullable<RenderOptions["logo"]>).__clipId = clipId;
 			}
 		}
 	}
@@ -188,12 +188,12 @@ export function svg(matrix: Matrix, size: number, options?: RenderOptions): SVGE
 					// @ts-ignore canvas element
 					imgEl.setAttribute("href", (logo.src as HTMLCanvasElement).toDataURL());
 				}
-			} catch (e) {
+			} catch (_e) {
 				// ignore and skip setting href if not serializable
 			}
 		}
-		if ((logo as any).__clipId) {
-			imgEl.setAttribute("clip-path", `url(#${(logo as any).__clipId})`);
+		if (logo.__clipId) {
+			imgEl.setAttribute("clip-path", `url(#${logo.__clipId})`);
 		}
 		svgEl.appendChild(imgEl);
 	}
