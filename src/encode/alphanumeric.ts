@@ -1,4 +1,4 @@
-import { alpha as alphanumeric } from "../utils/constants.ts";
+import { alpha as alphanumeric } from "../core/constants.ts";
 
 /**
  * Encodes a string in alphanumeric mode for QR codes.

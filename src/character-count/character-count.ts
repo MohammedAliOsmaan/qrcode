@@ -1,8 +1,9 @@
-import { Modes } from "../utils/constants.ts";
+import { Modes } from "../core/constants.ts";
 
 /**
  * This function calculates the character count for a given version and mode.
 */
+
 export function characterCount(version: number, mode: Modes, length: number): string {
     if (version >= 1 && version <= 9) {
         switch (mode) {
@@ -15,7 +16,7 @@ export function characterCount(version: number, mode: Modes, length: number): st
             case Modes.Kanji:
                 return (length).toString(2).padStart(8, '0');
         }
-    }else if (version >= 10 && version <= 26) {
+    } else if (version >= 10 && version <= 26) {
         switch (mode) {
             case Modes.Numeric:
                 return (length).toString(2).padStart(12, '0');
@@ -26,7 +27,7 @@ export function characterCount(version: number, mode: Modes, length: number): st
             case Modes.Kanji:
                 return (length).toString(2).padStart(10, '0');
         }
-    }else if (version >= 27 && version <= 40) {
+    } else if (version >= 27 && version <= 40) {
         switch (mode) {
             case Modes.Numeric:
                 return (length).toString(2).padStart(14, '0');
@@ -37,7 +38,7 @@ export function characterCount(version: number, mode: Modes, length: number): st
             case Modes.Kanji:
                 return (length).toString(2).padStart(12, '0');
         }
-    }else{
+    } else {
         throw new Error("Invalid version number. Version must be between 1 and 40.");
     }
 }

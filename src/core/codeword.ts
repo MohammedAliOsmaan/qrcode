@@ -1,12 +1,16 @@
 import { ErrorCorrectionLevel } from "./constants.ts";
 
+export interface ErrorCorrectionTable {
+  readonly [version: number]: { [ec in ErrorCorrectionLevel]: { codewords: number, ecCodewords: number, groups: { blocks: number, dataCodewords: number }[] } }
+}
+
 /**
  * QR Code Error Correction Table
  * Defines codewords, error correction codewords, groups and blocks structure
  * for each QR version and error correction level.
 */
 
-export const EC: {[version: number]: {[ec in ErrorCorrectionLevel]: {codewords: number, ecCodewords: number, groups: { blocks: number, dataCodewords: number }[]} }} = {
+export const EC: ErrorCorrectionTable = {
   1: {
     L: { codewords: 19, ecCodewords: 7, groups: [{ blocks: 1, dataCodewords: 19 }] },
     M: { codewords: 16, ecCodewords: 10, groups: [{ blocks: 1, dataCodewords: 16 }] },
@@ -252,8 +256,16 @@ export const EC: {[version: number]: {[ec in ErrorCorrectionLevel]: {codewords: 
   }
 };
 
+export interface Codeword {
+  codewords: number;
+  ecCodewords: number;
+  groups: {
+    blocks: number;
+    dataCodewords: number;
+  }[];
+}
 
-export function codewords(version: number, level: ErrorCorrectionLevel): { codewords: number; ecCodewords: number; groups: { blocks: number; dataCodewords: number }[] } {
+export function codewords(version: number, level: ErrorCorrectionLevel): Codeword {
   if (!EC[version] || !EC[version][level]) {
     throw new Error(`Invalid version ${version} or error correction level ${level}`);
   }
