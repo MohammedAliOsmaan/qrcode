@@ -1,4 +1,4 @@
-import { assertEquals, assertThrows } from "https://deno.land/std@0.200.0/testing/asserts.ts";
+import { assertEquals, assertThrows } from "jsr:@std/assert@1.0.18";
 import * as pattern from "../../src/matrix/pattern.ts";
 import { placement, zigzag } from "../../src/matrix/placement.ts";
 import { apply as applyVersion } from "../../src/matrix/version.ts";
@@ -129,7 +129,7 @@ Deno.test("placement fills only non-reserved modules and consumes bits", () => {
 
   // After placement, all data modules should be filled (either with bit value or 0)
   let availableAfter = 0;
-  for (let [r, c] of coords) {
+  for (const [r, c] of coords) {
     if (matrix[r][c] === null && !reserved(r, c, size)) availableAfter++;
   }
   assertEquals(availableAfter, 0);

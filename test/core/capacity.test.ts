@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert/equals";
+import { assertEquals } from "jsr:@std/assert@1.0.13";
 import { capacities, capacity } from "../../src/core/capacity.ts";
 import { Modes, quality } from "../../src/core/constants.ts";
 

@@ -1,4 +1,4 @@
-import { assertEquals } from "jsr:@std/assert";
+import { assertEquals } from "jsr:@std/assert@1.0.18";
 import { encode } from "../../src/encode/encode.ts";
 import { Modes } from "../../src/core/constants.ts";
 

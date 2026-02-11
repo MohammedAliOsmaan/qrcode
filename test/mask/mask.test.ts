@@ -8,7 +8,7 @@ Deno.test("penalty N1 counts consecutive modules in rows and columns", () => {
   const size = 6;
   // start with a checkerboard to avoid other penalties
   const base = Array.from({ length: size }, (_, r) => Array.from({ length: size }, (_, c) => ((r + c) % 2)));
-  const baseScore = penalty(base, size);
+//   const baseScore = penalty(base, size);
 
   const testMatrix = base.map(row => row.slice());
   testMatrix[0] = Array(size).fill(1);
@@ -34,7 +34,7 @@ Deno.test("penalty N1 counts consecutive modules in rows and columns", () => {
 Deno.test("penalty N2 counts 2x2 blocks", () => {
   const size = 4;
   const base = Array.from({ length: size }, (_, r) => Array.from({ length: size }, (_, c) => ((r + c) % 2)));
-  const baseScore = penalty(base, size);
+//   const baseScore = penalty(base, size);
 
   const testMatrix = base.map(row => row.slice());
   testMatrix[0][0] = 1;
@@ -64,7 +64,7 @@ Deno.test("penalty N2 counts 2x2 blocks", () => {
 Deno.test("penalty N3 detects finder-like patterns (horizontal)", () => {
   const size = 11;
   const base = Array.from({ length: size }, () => Array(size).fill(0));
-  const baseScore = penalty(base, size);
+//   const baseScore = penalty(base, size);
 
   const pattern = [1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0];
   const testMatrix = base.map(row => row.slice());
@@ -94,7 +94,7 @@ Deno.test("penalty N4 computes dark module ratio penalty", () => {
   const total = size * size;
   const half = Math.floor(total / 2);
   const base = Array.from({ length: size }, (_, r) => Array.from({ length: size }, (_, c) => ((r * size + c) < half ? 1 : 0)));
-  const baseScore = penalty(base, size);
+//   const baseScore = penalty(base, size);
 
   const testMatrix = base.map(row => row.slice());
   // add 40 more dark modules (1 each) spread out to avoid N1/N2/N3 side effects => reach ~60%
@@ -139,8 +139,8 @@ Deno.test("apply flips only non-reserved modules according to mask pattern", () 
 });
 
 Deno.test("toEcBits maps levels correctly", () => {
-  assertEquals(toEcBits("L" as any), ErrorCorrectionBits.L);
-  assertEquals(toEcBits("M" as any), ErrorCorrectionBits.M);
-  assertEquals(toEcBits("Q" as any), ErrorCorrectionBits.Q);
-  assertEquals(toEcBits("H" as any), ErrorCorrectionBits.H);
+  assertEquals(toEcBits("L"), ErrorCorrectionBits.L);
+  assertEquals(toEcBits("M"), ErrorCorrectionBits.M);
+  assertEquals(toEcBits("Q"), ErrorCorrectionBits.Q);
+  assertEquals(toEcBits("H"), ErrorCorrectionBits.H);
 });

@@ -1,5 +1,5 @@
-import { assert } from "jsr:@std/assert/assert";
-import { assertEquals } from "jsr:@std/assert/equals";
+import { assert } from "jsr:@std/assert@1.0.18";
+import { assertEquals } from "jsr:@std/assert@1.0.18";
 import { generator, division } from "../../src/ec/rs.ts";
 
 Deno.test("generator produces degree+1 polynomial and division remainder zero after appending", () => {
