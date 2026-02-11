@@ -1,3 +1,5 @@
+import { Matrix } from "../types/matrix.ts";
+
 export function penalty(matrix: Matrix, size: number): number {
     return (
         N1(matrix, size) +

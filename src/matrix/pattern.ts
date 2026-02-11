@@ -1,3 +1,5 @@
+import { Matrix } from "../types/matrix.ts";
+
 import { ALIGNMENT_ANCHORS } from "../core/constants.ts";
 
 export function finder(matrix: Matrix, size: number): void {

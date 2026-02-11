@@ -1,3 +1,4 @@
+import { Matrix } from "../types/matrix.ts";
 import { reserved } from "../core/reserve.ts";
 
 export function placement(matrix: Matrix, bits: number[], size: number) {

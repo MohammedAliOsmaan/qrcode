@@ -1,3 +1,5 @@
+import { Matrix } from "../types/matrix.ts";
+
 /**
  * Compute the 18-bit version information value for versions >= 7.
  * The value is composed of the 6-bit version number followed by 12 BCH bits

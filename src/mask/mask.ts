@@ -1,6 +1,7 @@
 import { reserved } from "../core/reserve.ts";
 import { format, apply as formatter, ErrorCorrectionBits } from "../matrix/format.ts";
 import { penalty } from "./penalty.ts";
+import { Matrix } from "../types/matrix.ts";
 import type { ErrorCorrectionLevel } from "../core/constants.ts";
 
 type Masks = (r: number, c: number) => boolean

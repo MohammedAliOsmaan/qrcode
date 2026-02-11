@@ -1,3 +1,5 @@
+import { Matrix } from "../types/matrix.ts";
+
 export enum ErrorCorrectionBits {
     L = 1, // 01 in binary
     M = 0, // 00 in binary
