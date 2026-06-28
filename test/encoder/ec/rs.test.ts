@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { multiply, division, generator } from "../../src/ec/rs.ts";
+import { division, generator, multiply } from "../../../src/encoder/ec/rs.ts";
 
 Deno.test("GF Multiply - edge cases and math", () => {
   // 1. Coverage for: if (a === 0 || b === 0) return 0;
@@ -30,14 +30,15 @@ Deno.test("Generator Polynomial - creation", () => {
 Deno.test("Division (Reed-Solomon Remainder)", () => {
   const msg = new Uint8Array([12, 34, 56]);
   const gen = generator(2); // [1, 3, 2]
+  const scratch = new Uint8Array(512);
 
   // 1. Coverage for: if (factor === 0) continue;
   const msgWithZero = new Uint8Array([0, 34, 56]);
-  const resultWithZero = division(msgWithZero, gen);
+  const resultWithZero = division(msgWithZero, gen, scratch);
   assertEquals(resultWithZero instanceof Uint8Array, true);
 
   // 2. Standard division
-  const remainder = division(msg, gen);
+  const remainder = division(msg, gen, scratch);
   // Remainder length should be gen.length - 1
   assertEquals(remainder.length, 2);
 });
@@ -45,9 +46,11 @@ Deno.test("Division (Reed-Solomon Remainder)", () => {
 Deno.test("Full Loop Coverage (Branch & Line)", () => {
   // Test a larger generator to ensure internal loops (i, j) run fully
   const gen = generator(10);
+  const scratch = new Uint8Array(512);
+
   assertEquals(gen.length, 11);
 
   const msg = new Uint8Array(20).fill(1);
-  const rem = division(msg, gen);
+  const rem = division(msg, gen, scratch);
   assertEquals(rem.length, 10);
 });
