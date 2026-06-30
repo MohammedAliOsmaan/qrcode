@@ -6,3 +6,6 @@ coverage/
 
 # public folder
 public/
+
+# lock fles
+*.lock

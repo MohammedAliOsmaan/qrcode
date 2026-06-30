@@ -1,10 +1,38 @@
 {
-  "tasks": {
-    "build": "deno bundle -o dist/index.js src/index.ts --minify"
+  "name": "@peno/qr",
+  "version": "0.5.0",
+  "publish": {
+    "include": [
+      "src/",
+      "README.md",
+      "LICENSE"
+    ]
   },
-  
+  "exports": {
+    ".": "./src/mod.ts",
+    "./encoder": "./src/encoder/mod.ts",
+    "./render/frontend": "./src/render/frontend/mod.ts",
+    "./render/backend": "./src/render/backend/mod.ts"
+  },
+  "tasks": {
+    "build": "deno bundle -o dist/index.ts src/mod.ts",
+    "check": "deno test && deno lint && deno fmt --check"
+  },
   "imports": {
-    "@std/assert": "jsr:@std/assert@1.0.18",
-    "@deno/dnt": "jsr:@deno/dnt@0.42.3"
+    "@std/assert": "jsr:@std/assert"
+  },
+  "coverage": {
+    "thresholds": {
+      "lines": 90,
+      "branches": 80,
+      "functions": 90
+    }
+  },
+  "compilerOptions": {
+    "lib": [
+      "deno.window",
+      "dom",
+      "esnext"
+    ]
   }
 }

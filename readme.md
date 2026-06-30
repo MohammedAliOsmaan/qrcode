@@ -1,198 +1,312 @@
-# Peno
+# QR Code Engine
 
-A high-performance, fully customizable TypeScript library for generating QR
-codes. Designed for browser and Node.js environments, this library supports all
-QR code standards, advanced rendering, and flexible integration.
+A high-performance, zero-dependency QR code generation library implementing the
+ISO/IEC 18004 specification. Built for speed, minimal memory footprint, and
+seamless cross-runtime compatibility.
 
-## Table of Contents
+## Installation
 
-- [Features](#features)
-- [Quick Start](#quick-start)
-- [API Reference](#api-reference)
-- [Rendering Options](#rendering-options)
-- [Advanced Usage](#advanced-usage)
-- [Development](#development)
-- [Test](#test)
-- [License](#license)
+### JSR
 
-## Features
+```bash
+deno add jsr:@peno/qr
+```
 
-- **Full QR Code Support:** Numeric, Alphanumeric, Byte, Kanji modes
-- **Error Correction:** Levels L, M, Q, H
-- **Version Control:** QR versions 1–40
-- **Flexible Rendering:** SVG, Canvas, PNG, JPG outputs
-- **Logo Overlay:** Custom logo with excavation and shape options
-- **Color Customization:** Module and background colors
-- **No Dependencies:** Pure TypeScript implementation
-- **Modular Design:** Use high-level or low-level APIs
+or with npm:
+
+```bash
+npx jsr add @peno/qr
+```
+
+### From Source
+
+```bash
+git clone https://github.com/peno-js/qr.git
+cd qr
+deno task build
+```
 
 ## Quick Start
 
-```typescript
-import { QRcode } from "./src/index.ts";
+### Browser (Frontend)
 
-const qr = new QRcode("Hello, world!", {
-  version: 2, // optional, auto-detected
-  ec: "M", // error correction: 'L', 'M', 'Q', 'H'
-  render: {
-    type: "svg",
-    color: { dark: "#222", light: "#fff" },
-    margin: 4,
-    logo: { src: "logo.png", width: 0.2, excavate: true },
-  },
+```js
+import { QR } from "@peno/qr";
+import { render } from "@peno/qr/render/frontend";
+
+// Generate QR code matrix
+const result = QR.encode("Hello, World!", {
+  ec: "M",
+  version: 1,
 });
 
-qr.build();
-const svgElement = qr.render();
+// Render as SVG (recommended for web)
+const svg = render(result.matrix, result.modules);
+
+document.body.appendChild(svg);
+
+// Or render as Canvas
+const canvas = render(result.matrix, result.modules, { type: "canvas" });
+
+document.body.appendChild(canvas);
 ```
 
-> [!NOTE]
-> You should build the **QR code** using **.build()** method then render it with
-> **.render()**
+### Backend / Server (Node.js, Deno)
+
+```js
+import { QR } from "@peno/qr";
+import { render } from "@peno/qr/render/backend";
+
+// Generate QR code matrix
+const result = QR.encode("https://example.com", {
+  ec: "H",
+  version: 2,
+});
+
+// Render as PNG bytes (async)
+const pngBytes = await render(result.matrix, result.modules, {
+  type: "png",
+  scale: 8,
+});
+
+// Write to file or send as response
+```
 
 ## API Reference
 
-### QRcode Class
+### QR.encode()
 
-#### Constructor
+The core encoding function that generates a QR code matrix.
 
 ```ts
-new QRcode(input: string, options?: Options);
+QR.encode(
+  input: string | number,
+  options?: Options
+): QRCode
 ```
 
-- `input`: Data to encode
-- `options`: Optional settings:
-  - `version`: QR version (1–40)
-  - `ec`: Error correction level ('L', 'M', 'Q', 'H')
-  - `mask`: Mask pattern (0–7)
-  - `render`: Rendering options (see below)
+**Parameters:**
 
-#### Options interface
+- `input` – Data to encode (string or number)
+- `options` – Optional configuration object
+
+**Options:**
 
 ```ts
 interface Options {
-  version?: number;
-  ec?: ErrorCorrectionLevel;
-  mask?: number;
-  render: RenderOptions;
+  version?: number; // QR version 1–40 (auto-selected if omitted)
+  ec?: "L" | "M" | "Q" | "H"; // Error correction level
+  mask?: number; // Mask pattern 0–7 (auto-selected if omitted)
 }
 ```
 
-#### Methods
-
-- `build()`: Generates the QR code matrix.
-- `render()`: Renders the QR code as Svg/Canvas/PNG/JPG based on options.
-
-> [!NOTE]
-> Recommendation: Use SVG for Web The svg renderer is the flagship choice for
-> web applications. It provides the highest score and ensures a sharp, scalable
-> image. It is also the only engine that natively supports auto-generated titles
-> for screen readers.
-
-> [!CAUTION]
-> When using canvas() or image-based outputs (PNG/JPG) with a logo, ensure the
-> logo is pre-loaded or provided as a Data URI, as these methods do not support
-> asynchronous loading during the render cycle.
-
-#### Example
-
-```typescript
-// For image-based outputs (PNG/JPG)
-const qr = new QRcode("https://example.com", {
-  render: { type: "png", size: 512 },
-});
-
-qr.build();
-
-// Returns a Base64 Data URI string in the browser
-// or a Buffer in Node.js
-const pngData = qr.render();
-```
-
-## Rendering Options
-
-| Format  | Return type         | Status |
-| ------- | ------------------- | ------ |
-| SVG     | `SVGElement`        | Stable |
-| Canvas  | `HTMLCanvasElement` | _Beta_ |
-| PNG/JPG | `string` / `Buffer` | _Beta_ |
-
-See `src/types/render.ts` for full details. Key fields:
+**Returns:**
 
 ```ts
-interface RenderOptions {
+interface QRCode {
+  input: string | number;
+  length: number;
+  mode: "numeric" | "alphanumeric" | "byte" | "kanji";
+  version: number;
+  ec: "L" | "M" | "Q" | "H";
+  modules: number; // Module count (version * 4 + 17)
+  matrix: Uint8Array; // The QR code matrix as binary data
+}
+```
+
+**Example:**
+
+```js
+const result = QR.encode("12345", { ec: "M" });
+console.log(result.version); // Auto-selected version
+console.log(result.modules); // e.g., 21 for version 1
+```
+
+### Frontend Rendering
+
+For browser environments, use the frontend renderer for optimal performance:
+
+```ts
+import { render } from "@peno/qr/render/frontend";
+
+render(
+  matrix: Uint8Array,
+  size: number,
+  options?: FrontendOptions
+): HTMLCanvasElement | string
+```
+
+**Options:**
+
+```ts
+interface FrontendOptions {
+  type?: "svg" | "canvas"; // Default: "svg"
   size?: number;
   scale?: number;
   margin?: number;
+  color?: {
+    dark?: string; // Module color (default: #000000)
+    light?: string; // Background color (default: #ffffff)
+  };
+  content?: string;
+}
+```
 
+**Returns:**
+
+- SVG: An SVG string (scalable vector)
+- Canvas: An `HTMLCanvasElement` (raster image)
+
+**Example:**
+
+```js
+// SVG (recommended for web)
+const svg = render(result.matrix, result.modules, {
+  type: "svg",
+  color: { dark: "#000", light: "#fff" },
+});
+
+// Canvas
+const canvas = render(result.matrix, result.modules, {
+  type: "canvas",
+  scale: 2,
+});
+```
+
+### Backend Rendering
+
+For server/Deno environments, use the backend renderer:
+
+```ts
+import { render } from "@peno/qr/render/backend";
+
+render(
+  matrix: Uint8Array,
+  size: number,
+  options?: BackendOptions
+): Promise<Uint8Array | string>
+```
+
+**Options:**
+
+```ts
+interface BackendOptions {
+  type?: "svg" | "png"; // Default: "svg"
+  size?: number;
+  scale?: number;
+  margin?: number;
   color?: {
     dark?: string;
     light?: string;
   };
-
-  type?: "svg" | "canvas" | "png" | "jpg";
-
   content?: string;
-
-  logo?: {
-    src: string;
-    width?: number; // ratio (<=1) or pixels (>1). default 0.2 (20%)
-    excavate?: boolean; // clear modules underneath the logo area
-    shape?: "square" | "rounded" | "circle";
-    borderRadius?: string;
-    background?: string; // background color behind logo; undefined = transparent
-  };
 }
 ```
 
-#### Logo Example
+**Returns:**
 
-```typescript
-logo: {
-  src: 'logo.png',
-  width: 0.2, // 20% of QR size
-  shape: 'circle',
-  excavate: true,
-  background: "#ffffff" // Ensure the logo is visibile
-}
+- SVG: An SVG string
+- PNG: A `Uint8Array` containing PNG binary data
+
+**Example:**
+
+```ts
+// PNG output (async)
+const pngBuffer = await render(result.matrix, result.modules, {
+  type: "png",
+  scale: 8,
+  color: { dark: "#333", light: "#eee" },
+});
+
+// Send as response or write to file
 ```
 
-## Advanced Usage
+## Examples
 
-- **Custom Encoding:** Use lower-level modules for manual control
-- **Error Correction:** Fine-tune EC level for resilience
-- **Mask Selection:** Specify mask pattern for visual optimization
-- **Integration:** Embed QR output in web apps
+### Basic QR Code
+
+```js
+import { QR } from "@peno/qr";
+import { render } from "@peno/qr/render/frontend";
+
+const result = QR.Encoder.encode("Hello, QR!");
+const svg = render(result.matrix, result.modules);
+document.body.appendChild(svg);
+```
+
+### Custom Error Correction
+
+```ts
+// Higher error correction for better scannability
+const result = QR.Encoder.encode("Contact: john@example.com", {
+  ec: "H", // Highest error correction level
+});
+```
+
+### High-Quality PNG Export
+
+```js
+import { QR } from "@peno/qr";
+import { render } from "@peno/qr/render/backend";
+
+const result = QR.Encoder.encode("https://example.com", { ec: "H" });
+const png = await render(result.matrix, result.modules, {
+  type: "png",
+  scale: 10, // High resolution
+  margin: 2, // Quiet zone
+  color: { dark: "#000", light: "#fff" },
+});
+```
+
+### Custom Colors
+
+```js
+const result = QR.Encoder.encode("Styled QR Code");
+const svg = render(result.matrix, result.modules, {
+  type: "svg",
+  color: {
+    dark: "#2c3e50",
+    light: "#ecf0f1",
+  },
+});
+```
 
 ## Development
 
-If you want to build the library from the source:
+### Setup
 
-1. Clone the repository
+Clone the repository and install dependencies:
 
-```
-$ git clone https://github.com/mohammed-ali-osman/qrcode.git
-```
-
-or
-
-```
-$ git clone git@github.com:mohammed-ali-osman/qrcode.git
+```bash
+$ git clone https://github.com/mohammed-ali-osman/qr.git
+$ cd qr
 ```
 
-2. Build the project
+### Build
 
-```
-$ deno task build
+```bash
+deno task build
 ```
 
-The compiled file will be generated in the `dist/` directory.
+The compiled output will be generated in the `dist/` directory.
 
-## Test
+### Testing
 
+Run the full test suite:
+
+```bash
+deno test
 ```
-$ deno test
-```
+
+## Features
+
+- **Full QR Code Support** – All encoding modes (Numeric, Alphanumeric, Byte,
+  Kanji)
+- **Advanced Error Correction** – Levels L, M, Q, H with Reed-Solomon encoding
+- **Version 1–40** – Automatic or manual version selection
+- **Multiple Output Formats** – SVG (vector), Canvas (DOM), PNG (binary)
+- **Zero Dependencies** – Pure ts, no external libraries
+- **Cross-Runtime** – Works on Deno, Node.js, and modern browsers
 
 ## License
 
